@@ -1,0 +1,101 @@
+# graphql-express-exporter
+
+graphql-express-exporter is based on api-express-exporter, a prometheus exporter that helps you track express api requests. Plug it in and start monitoring express api requests!
+
+```js
+const app = express();
+
+...
+
+// Before all routes
+app.use(require("graphql-express-exporter")()); // That's it!
+
+// Apply your routes
+app.get('hello', (req, res) => {
+  res.json({ 'hello': 'world!'})
+});
+```
+
+## Difference between graphql-express-exporter and api-express-exporters
+
+graphql-express-exporter has exposed 1 more option `promBundleOption`
+It will allow you to add more option to express-prom-bundle especially for `customLabels` and `transformLabels`
+which we use to extract graphql's method from body content of graphql path as default settings
+
+## Installation
+
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/).
+
+Before installing, [download and install Node.js](https://nodejs.org/en/download/).
+Node.js 0.10 or higher is required.
+
+Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+
+```bash
+$ npm install graphql-express-exporter
+```
+
+This package depends on `express`, `prom-client`, `express-list-endpoints`, `express-prom-bundle`, and `url-pattern`
+
+## Configuration
+
+| Option Name      | Description  |
+|------------------|--------------|
+| host             | host string for the metrics server. Defaults to `127.0.0.1`  |
+| port             | port that metrics server listens on. Defaults to 9991        |
+| urlPatternMaker  | function to create the url pattern matcher, defaults to `(path) => new UrlPattern(path, { segmentNameCharset: "a-zA-Z0-9_-" })`  |
+| normalizePath    | boolean. Set this to false to use the original url instead of cleaned up ones. |
+| createServer     | boolean. Set this to false to not create the exporter server endpoint |
+
+## Sample Output
+
+```$js
+$ node src/main.js
+Server is running on port 3000
+Metrics server listening on 127.0.0.1:9991
+Route found: /api/graphql
+Route found: /api/report/station
+Route found: /api/report/device
+```
+
+Navigate to `127.0.0.1:9991/metrics`, you will see:
+
+```text
+
+# HELP http_request_duration_seconds duration histogram of http responses labeled with: status_code, method, path
+# TYPE http_request_duration_seconds histogram
+http_request_duration_seconds_bucket{le="0.03",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 0
+http_request_duration_seconds_bucket{le="0.3",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 21
+http_request_duration_seconds_bucket{le="1",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_bucket{le="1.5",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_bucket{le="3",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_bucket{le="5",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_bucket{le="10",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_bucket{le="+Inf",status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_sum{status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 6.762091599000001
+http_request_duration_seconds_count{status_code="200",method="POST",path="/api/graphql",gqlmethod="getNewNotiNumber"} 27
+http_request_duration_seconds_bucket{le="0.03",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 0
+http_request_duration_seconds_bucket{le="0.3",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_bucket{le="1",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_bucket{le="1.5",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_bucket{le="3",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_bucket{le="5",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_bucket{le="10",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_bucket{le="+Inf",status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+http_request_duration_seconds_sum{status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 0.115013634
+http_request_duration_seconds_count{status_code="200",method="POST",path="/api/graphql",gqlmethod="User"} 1
+
+# HELP up 1 = up, 0 = not up
+# TYPE up gauge
+up 1
+```
+
+To see how to visualize the data in prometheus+grafana, you can check out [Node.js Monitoring with Prometheus+Grafana](https://medium.com/teamzerolabs/node-js-monitoring-with-prometheus-grafana-3056362ccb80) from api-express-exporter
+
+Happy monitoring!
+
+## License
+
+  [MIT](LICENSE)
